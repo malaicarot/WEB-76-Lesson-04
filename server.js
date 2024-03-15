@@ -1,12 +1,10 @@
 import express from 'express'
 import { SERVER_CONFIG } from './src/configs/server.config.js'
 import { UserRouter } from './src/routes/user.route.js'
-import { DB_CONFIG } from './src/configs/db.config.js'
 import mongoose  from 'mongoose'
+import * as dotenv from 'dotenv'
 
-
-
-const DB_CONNECTION_STR = "mongodb+srv://" + DB_CONFIG.userName + ":" + DB_CONFIG.passWord + "@cluster0.63i9ng1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+dotenv.config();
 
 const app = express()
 
@@ -18,7 +16,7 @@ main()
 
 async function main(){
     try {
-        await mongoose.connect(DB_CONNECTION_STR);
+        await mongoose.connect(process.env.DB_CONNECT);
         console.log("Connect to DB success!")
         console.log("Waiting connect Server!")
     

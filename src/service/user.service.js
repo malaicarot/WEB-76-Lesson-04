@@ -7,6 +7,7 @@ import { PostService as postService } from "./post.service.js";
 import UsersModel from "../model/user.model.js";
 import { PostDTO } from "../dto/post.dto.js";
 import { CommentService as commentService } from "./comment.service.js";
+import bcrypt from 'bcrypt';
 
 
 
@@ -25,8 +26,17 @@ async function registerUser(user) {
     if (user instanceof UserDTO === false) {
         throw new Error("Invalid user object");
     }
-    
-    // user.id = userIdGenerator();
+
+    const checkEmailExist = await UsersModel.findOne({ email: user.email });
+
+    if (checkEmailExist){
+        throw new Error("Email is exits")
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPass = await bcrypt.hash(user.pass, salt);
+    user.pass = hashPass;
+
     return await UsersModel.create(user)
 }
 

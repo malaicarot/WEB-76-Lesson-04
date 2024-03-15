@@ -30,6 +30,7 @@ async function getAll(req, res) {
 
 async function register(req, res) {
     try {
+
         if (CommonUtils.checkNullOrUndefined(req.body)) {
             throw new BadRequestError(ERROR_MSG.INVALID_REQ)
         }
