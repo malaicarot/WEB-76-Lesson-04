@@ -7,11 +7,15 @@ import { PostService as postService } from "./post.service.js";
 import UsersModel from "../model/user.model.js";
 import { PostDTO } from "../dto/post.dto.js";
 import { CommentService as commentService } from "./comment.service.js";
+import { BadRequestError } from "../error/BadRequest.error.js";
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
 
 
 
 async function getAllUsers() {
+    
     return await UsersModel.find({});
     
 }
@@ -51,6 +55,28 @@ async function registerUser(user) {
     });
 
     return await newUser.save()
+}
+
+async function login(user) {
+    if (user instanceof UserDTO === false) {
+        throw new Error("Invalid user object");
+    }
+
+    const userDB = await UsersModel.findOne({ userName: user.userName });
+
+    if (CommonUtils.checkNullOrUndefined(userDB)) {
+        throw new Error("User not found!");
+    }
+
+    const checkPass =  bcrypt.compare(user.pass, userDB.pass)
+
+    if(!checkPass){
+        throw new Error("Pass word is invalid");
+    }
+
+    const token = jwt.sign({id: user.id}, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24});
+
+    return await  `User ${user.userName} has logged in! token: ${token}`
 }
 
 async function createPost(userId, post) {
@@ -118,6 +144,7 @@ async function updateComment(commentId, userId, commentNeedFix) {
 
 export const UserService = {
     registerUser,
+    login,
     getAllUsers,
     getById,
     commentOnPostByPostId,

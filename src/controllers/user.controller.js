@@ -6,6 +6,7 @@ import { BaseError } from "../error/base.error.js";
 import { PostService as postService } from "../service/post.service.js";
 import { UserService as userService } from "../service/user.service.js";
 import { CommonUtils } from "../utils/common.util.js";
+// import verifyToken from "../middlewares/verify_token.js";
 
 
 async function getAll(req, res) {
@@ -54,7 +55,32 @@ async function register(req, res) {
         });
     }
 }
+async function login(req, res) {
+    try {
+        if (CommonUtils.checkNullOrUndefined(req.body)) {
+            throw new BadRequestError(ERROR_MSG.INVALID_REQ)
+        }
 
+        const user = new UserDTO(req.body);
+        res.json(await userService.login(user));
+
+    } catch (err) {
+        console.error(`Error while login`, err.message);
+
+        if (err instanceof BaseError) {
+            res.status(err.statusCode)
+        } else {
+            res.status(500)
+        }
+
+        res.json({
+            error: {
+                msg: err.message
+            }
+        });
+        
+    }
+}
 
 async function updateComment(req, res) {
     try {
@@ -146,6 +172,7 @@ async function getThreeComments(req, res) {
 export const UserController = {
     getAll,
     register,
+    login,
     updateComment,
     getCommentByPostId,
     getThreeComments

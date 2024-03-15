@@ -1,13 +1,16 @@
 import express from 'express';
 import { UserController } from '../controllers/user.controller.js';
 import { PostController } from '../controllers/post.controller.js';
+import verifyToken from '../middlewares/verify_token.js';
 
 
 const UserRouter = express.Router();
 
-UserRouter.get("/", UserController.getAll)
+UserRouter.get("/", verifyToken,  UserController.getAll)
 
 UserRouter.post("/register", UserController.register)
+
+UserRouter.post("/login", UserController.login)
 
 UserRouter.post("/create-post/:userId", PostController.createPost);
 
