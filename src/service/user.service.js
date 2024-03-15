@@ -22,6 +22,12 @@ async function getById(id) {
 
 }
 
+
+function isValidEmail(email) {
+    const emailPattern = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+    return emailPattern.test(email);
+  }
+
 async function registerUser(user) {
     if (user instanceof UserDTO === false) {
         throw new Error("Invalid user object");
@@ -29,15 +35,22 @@ async function registerUser(user) {
 
     const checkEmailExist = await UsersModel.findOne({ email: user.email });
 
-    if (checkEmailExist){
-        throw new Error("Email is exits")
+    if (checkEmailExist || !isValidEmail(user.email)){
+        throw new Error("Error with email (exits or invalid)")
     }
+
 
     const salt = await bcrypt.genSalt(10);
     const hashPass = await bcrypt.hash(user.pass, salt);
-    user.pass = hashPass;
+    
+    const newUser = new UsersModel({
+        userName: user.userName,
+        email: user.email,
+        pass: hashPass,
 
-    return await UsersModel.create(user)
+    });
+
+    return await newUser.save()
 }
 
 async function createPost(userId, post) {
